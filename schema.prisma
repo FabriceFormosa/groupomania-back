@@ -1,0 +1,42 @@
+
+//https://app.planetscale.com/formosafabrice/groupomania
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  posts Post[]
+}
+
+// relation one to many Post ---> few comments
+model Post {
+  id       Int       @id @default(autoincrement())
+  title    String
+  content  String
+  excerpt  String?
+  likes    Int       @default(0)
+  comments Comment[]
+  userId   Int
+   post    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Comment {
+  id      Int    @id @default(autoincrement())
+  comment String
+  postId  Int
+  post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
