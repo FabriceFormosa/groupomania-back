@@ -29,7 +29,7 @@ function makeToken(email)
 
 function checkPassword( user,password )
 {
-   console.log("checkPassword  user.password: ",user.password ," password: ",password)
+   //console.log("checkPassword  user.password: ",user.password ," password: ",password)
     return bcrypt.compare(password,user.password)
 }
 

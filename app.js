@@ -16,7 +16,7 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 app.use(cors())
 
-app.use('/images', express.static(path.join(__dirname, 'images')));
+//app.use('/images', express.static(path.join(__dirname, 'images')));
 
   console.log("path : " + path + "__dirname : " + __dirname);
 
@@ -30,10 +30,16 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 
  const { logUser , signupUser }  = require('./controllers/users');
-
+//  const { getPosts } = require('./controllers/posts');
+//  const { checkToken} = require('./middleware/token');
+  const { postRouter }  =require('./routes/posts');
   // app.all("*",logRequest)
   //app.get("/" , logRequest , (req,res)=> res.send("hello"))
+  app.use("/posts", postRouter)
   app.post("/auth/login",logUser)
   app.post("/auth/signup",signupUser)
+
+  //const {imageUpload} = require('./middleware/medias')
+  app.use("/upload",express.static('upload'));
   
   module.exports = app;
