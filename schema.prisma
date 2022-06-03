@@ -11,32 +11,31 @@ datasource db {
   referentialIntegrity = "prisma"
 }
 
-model User {
+model Users {
   id    Int     @id @default(autoincrement())
   email String  @unique
-  name  String?
-  posts Post[]
+  password String
+  posts Posts[]
+  comments  Comments[]
 }
 
 // relation one to many Post ---> few comments
-model Post {
+model Posts {
   id       Int       @id @default(autoincrement())
-  title    String
   content  String
-  excerpt  String?
-  likes    Int       @default(0)
-  comments Comment[]
+  imageUrl String?
   userId   Int
-   post    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
+  user     Users  @relation(fields: [userId], references: [id])
+  comments Comments[]
+  createdAt DateTime  @default(now())
 }
-
-model Comment {
+  
+model Comments {
   id      Int    @id @default(autoincrement())
-  comment String
+  content String
   postId  Int
-  post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-
-  @@index([postId])
+  post    Posts   @relation(fields: [postId], references: [id])
+  createdAt DateTime  @default(now())
+  userId  Int
+  user    Users   @relation(fields: [userId], references: [id])
 }

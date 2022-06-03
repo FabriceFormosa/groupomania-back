@@ -18,28 +18,30 @@ app.use(cors())
 
 //app.use('/images', express.static(path.join(__dirname, 'images')));
 
-  console.log("path : " + path + "__dirname : " + __dirname);
+console.log("path : " + path + "__dirname : " + __dirname);
 
 
 
-  //----------------------------------------------pour des tests
-  // const {prismaClient} = require("@prisma/client");
-  // prisma =new(prismaClient);
- // const jwt = require('jsonwebtoken');// const allUsers = prisma.user.findMany().then(console.log).catch(console.error);
-//const { ExplainVerbosity } = require('mongodb');
+//----------------------------------------------pour des tests
 
 
- const { logUser , signupUser }  = require('./controllers/users');
+
+const { logUser , signupUser }  = require('./controllers/users');
 //  const { getPosts } = require('./controllers/posts');
 //  const { checkToken} = require('./middleware/token');
-  const { postRouter }  =require('./routes/posts');
-  // app.all("*",logRequest)
-  //app.get("/" , logRequest , (req,res)=> res.send("hello"))
-  app.use("/posts", postRouter)
-  app.post("/auth/login",logUser)
-  app.post("/auth/signup",signupUser)
+const { postRouter }  =require('./routes/posts');
+// app.all("*",logRequest)
+//app.get("/" , logRequest , (req,res)=> res.send("hello"))
+app.use("/posts", postRouter)
+app.post("/auth/login",logUser)
+app.post("/signup",signupUser)
 
-  //const {imageUpload} = require('./middleware/medias')
-  app.use("/upload",express.static('upload'));
-  
-  module.exports = app;
+//const {imageUpload} = require('./middleware/medias')
+app.use("/upload",express.static('upload'));
+
+// const {prisma} = require('./db/db')
+// const allUsers = prisma.Users.findMany().then(console.log).catch(console.error);
+// const allPosts = prisma.Posts.findMany().then(console.log).catch(console.error);
+
+
+module.exports = app;
