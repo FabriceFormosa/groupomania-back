@@ -62,6 +62,9 @@ async function getPosts(req,res)
                 include:{
                     comments:
                     {
+                        orderBy:{
+                            createdAt:"asc"
+                        },
                         include:{
                             user:
                             {
@@ -124,40 +127,64 @@ async function getPosts(req,res)
         
     }
     
-    function deleteComments(comments)
-    {
+    // function deleteComments(comments)
+    // {
         
-        comments.forEach((comment) => {
+    //     comments.forEach((comment) => {
             
-            dbComments.forEach((dbcomment) => {
+    //         dbComments.forEach((dbcomment) => {
                 
-                if( comment.id === dbcomment.id)
-                console.log("delete comment ",comment.id,dbcomment.id)
-            })
+    //             if( comment.id === dbcomment.id)
+    //             console.log("delete comment ",comment.id,dbcomment.id)
+    //         })
             
+    //     })
+    // }
+    
+    
+    async function deletePost(req, res) {
+
+        // Id du post
+        const postId=Number(req.params.id)
+
+        const post = await prisma.Posts.findUnique( 
+            {
+            where: {id:postId},
+            include:{   
+                user:{
+                    select:{email:true}
+                }
+            }
         })
-        
-        
-        
-    }
-    
-    
-    function deletePost(req, res) {
-        
-        const postId=req.params.id
-        const post = posts.find( (post)  => post.id === postId)
+
+        console.log("deletePost post:",post)
+
+        // test existence du post
         if( post ==null)
         return res.status(404).send({error:"Post not found"})
         
-        const postindex = posts.indexOf( post)
+        // test appartenance du post au user
+        const  email = req.email
+        if ( email != post.user.email )
+        return res.status(404).send({error:"Not owner of this post"})
+
+        // delete the comments
+        const nbCommentDeleted = await prisma.Comments.deleteMany( {where : {postId:post.id}}) //  
+        console.log("deletePost nbCommentDeleted : ",nbCommentDeleted)
+
+        /// delete the post
+        await prisma.Posts.delete( {where : {id:post.id}}) 
+
+        res.send({  message:"Post deleted"})    
+        // const postindex = posts.indexOf( post)
         
-        console.log("post.comments :",post.comments)
-        deleteComments(post.comments)
+        // console.log("post.comments :",post.comments)
+        // deleteComments(post.comments)
         
-        posts.splice(postindex,1)
+        // posts.splice(postindex,1)
         
-        console.log("posts ",posts)
-        res.send({message:`Post ${postId} was deleted successfully`,posts:posts})
+       //console.log("posts ",posts)
+        //res.send({message:`Post ${postId} was deleted successfully`,posts:posts})
         
         
     }
@@ -174,18 +201,26 @@ async function getPosts(req,res)
     async function createComment(req,res){
         
         try{
-            
+            // id du post
             console.log("createComment postId : ",req.params.id)    
             const postId=Number(req.params.id)
             
+            // recup du post avec l id 
             const post = await prisma.Posts.findUnique( {where: {id:postId}})
             
             console.log("post :", post  )
             
+            // test existence du post
             if( post ==null)
             return res.status(404).send({error:"Post not found"})
+
+            //  recupération du userId
+            const email = req.email;
+            console.log("email : ",email)
+            const userId = await prisma.Users.findUnique( {where: {email}})
             
-            const commentToSend = { content:req.body.comment,postId:post.id,userId:post.userId}
+            //le post existe , ajout du commentaire
+            const commentToSend = { content:req.body.comment,postId:post.id,userId:userId.id}
             console.log(typeof(post.id))
             console.log(typeof(post.userId))
             console.log("commentToSend : " ,commentToSend   )
