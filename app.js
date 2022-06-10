@@ -24,24 +24,15 @@ console.log("path : " + path + "__dirname : " + __dirname);
 
 //----------------------------------------------pour des tests
 
-
-
-const { logUser , signupUser }  = require('./controllers/users');
-//  const { getPosts } = require('./controllers/posts');
-//  const { checkToken} = require('./middleware/token');
 const { postRouter }  =require('./routes/posts');
-// app.all("*",logRequest)
-//app.get("/" , logRequest , (req,res)=> res.send("hello"))
 app.use("/posts", postRouter)
-app.post("/auth/login",logUser)
-app.post("/signup",signupUser)
 
-//const {imageUpload} = require('./middleware/medias')
+const { usersRouter }  =require('./routes/users');
+app.use("/users", usersRouter)
+
 app.use("/upload",express.static('upload'));
 
-// const {prisma} = require('./db/db')
-// const allUsers = prisma.Users.findMany().then(console.log).catch(console.error);
-// const allPosts = prisma.Posts.findMany().then(console.log).catch(console.error);
+app.use("/avatar",express.static('avatar'));
 
 
 module.exports = app;

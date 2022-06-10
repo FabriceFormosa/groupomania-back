@@ -15,9 +15,15 @@ model Users {
   id    Int     @id @default(autoincrement())
   email String  @unique
   password String
+  admin String
+  avatar String?
+  name String
+  lastName String
+  service String
   posts Posts[]
   comments  Comments[]
-}
+  createdAt DateTime  @default(now())
+ }
 
 // relation one to many Post ---> few comments
 model Posts {

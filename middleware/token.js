@@ -10,7 +10,7 @@ function checkToken(req, res, next) {
    jwt.verify(token,process.env.SECRET_KEY,(error,decoded) => {
        if(error) return res.status(401).send({error:"Invalid Token"})
        req.email = decoded.email
-       //console.log("decoded.email :",decoded.email)
+       console.log("decoded.email :",decoded.email)
        next()
    })
 

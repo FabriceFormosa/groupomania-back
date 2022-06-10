@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
     let name = file.originalname.split(' ').join('_');
     
     name = name.split("."+ extension)[0]
-    console.log( "name",name)
+    console.log( "***************************************************************************** name",name)
 
     console.log( "file",file)
     
@@ -27,8 +27,30 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage: storage,dest:"upload/"})
 const imageUpload = upload.single('image')
-//module.exports = multer({storage: storage}).single('image');
 
 
+/***************************************** */
+const storage_avatar = multer.diskStorage({
+  destination: (req, file, callback) => {
+    callback(null, 'avatar');
+  },
+  filename: (req, file, callback) => {
+    const extension = MIME_TYPES[file.mimetype];
+    let name = file.originalname.split(' ').join('_');
+    
+    name = name.split("."+ extension)[0]
+    console.log("++++++++++++++++++++++  name",name)
 
-module.exports ={imageUpload}
+    console.log( "file",file)
+    
+    console.log("extension ",extension)
+    callback(null, name + '_' + Date.now() + '.' + extension);
+  }
+});
+
+
+const avatar = multer({storage: storage_avatar,dest:"avatar/"})
+const imageAvatar = avatar.single('image')
+
+
+module.exports ={imageUpload,imageAvatar}

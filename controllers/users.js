@@ -3,7 +3,91 @@ const jwt = require('jsonwebtoken');
 const {users,prisma} = require('../db/db.js')
 
 
+function createImageurl(req){
+  console.log("createImageurl ",req.file.path)
+  let pathToImage=req.file.path.replace("\\","/")
+  const protocol = req.protocol
+  const host = req.get("host")
+  return `${protocol}://${host}/${pathToImage}`
+}
 
+async function updateUser(req,res)
+{
+  try
+  {
+
+   // const content = req.body.content;
+   console.log("---- updateUser called ----user_datas:-",req.body.user_datas)
+   const hasImage=req.file != null
+   const urlAvatar = hasImage ? createImageurl(req):undefined
+
+   const  {id,email,admin,name,lastName,service} = JSON.parse(req.body.user_datas)
+
+    const user = await prisma.Users.findUnique({where: {id: id}})
+    console.log("updateUser user: " , user)
+
+    if( user == null ) return res.status(404).send({error:"user not found"})
+
+    //console.log("updateUser user:",user)
+    const userId=Number(user.id)
+    console.log("updateUser userId:",userId)
+
+    // /// update the user
+    const updateUser = await prisma.Users.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        email:email,
+        name: name,
+        lastName: lastName,
+        service: service,
+        admin:admin,
+        avatar: urlAvatar
+
+      }
+    })
+
+    res.send({updateUser:updateUser}) 
+
+  }
+  catch(error)
+  {
+    res.status(500).send({error:"user not updated"})
+  }
+
+}
+
+async function deleteUser(req,res)
+{
+  
+
+  try
+  {
+
+   console.log("---- deleteUser called -----",req.body.email)
+    const email = req.body.email
+    const user = await prisma.Users.findUnique({where: {email: email}})
+    console.log("deleteUser user: " , user)
+
+    if( user == null ) return res.status(404).send({error:"user not found"})
+
+    console.log("deleteUser user:",user)
+    const userId=Number(user.id)
+    console.log("deleteUser userId:",userId)
+
+    // /// delete the user
+    const result = await prisma.Users.delete( {where : {id:userId}}) 
+
+    res.send({  message:"User "+ email +" deleted"  }) 
+
+  }
+  catch(error)
+  {
+    res.status(500).send({error:"user not deleted"})
+  }
+
+}
 
 // const jwt = require('jsonwebtoken');// 
 //const { ExplainVerbosity } = require('mongodb');
@@ -17,15 +101,22 @@ async function logUser(req,res)
     
     const  {email,password} = req.body
     const user = await getUser(email)
-    
     if( user == null ) return res.status(404).send({error:"user not found"})
+    
     const  isPasswordCorrect = await checkPassword(user,password)
     
     if( !isPasswordCorrect )
     return res.status(401).send({error:"Wrong password"})
     
     const token = makeToken(email)
-    res.send({token: token})
+
+    // il faut  aussi recuperer tous les emails / url avatar dans la base pour eviter trop de requete
+    const allUsers = await prisma.Users.findMany();
+  
+      
+     console.log("------------------- allUsers ----------------",allUsers)
+
+    res.send({token: token,user:user,users:allUsers})
   }
   catch(error)
   {
@@ -49,26 +140,80 @@ function checkPassword( user,password )
   return bcrypt.compare(password,user.password)
 }
 
-function getUser(email)
+
+async function getUserByEmail(req,res)
 {
-  return prisma.Users.findUnique({where: {email: email}})
+  const email = req.params.email
+ // console.log("req.params.email:",email)
+
+  
+  const user = await prisma.Users.findUnique({where: {email: email}})
+  if( user == null)
+  {
+    res.send({error:'user not founded '})
+  }
+    
+
+    res.send({user,message:'user founded '})
   //return users.find(user => user.email === email)
   
 }
 
+// locale
+async function getUser(email)
+{
+  return await prisma.Users.findUnique({where: {email: email}})
+
+  //return users.find(user => user.email === email)
+  
+}
+
+async function createUser(req,res)
+{
+  console.log("---- createUser called -----",req.body)
+
+  try{
+    
+    const  {email,password,admin,name,lastName,service} = req.body
+    
+    // if(password!=confirmPassword) return res.status(404).send({error: "password doesn't match"})
+    
+    const userDB = await getUser(email)
+    
+    if ( userDB != null) return res.status(404).send({error:"user already exists"})
+
+   
+    const hash = await hashPassword(password)
+   const user = await saveUser({email: email, password: hash,admin:admin,name:name,lastName:lastName,service:service })
+   //const user = await saveUser({email: email, password: hash,admin:admin})
+    console.log("---- signupUser called -----saveUser done ",user);
+    res.send({user,error:'user created'})
+  }
+  catch(error)
+  {
+    res.status(500).send({error})
+  }
+}
+
 async function signupUser(req,res)
 {
+  console.log("---- signupUser called -----",req.body)
   try{
-    console.log("signupUser called ",req. body)
-    const  {email,password,confirmPassword} = req. body
+    
+    const  {email,password,confirmPassword,admin,name,lastName,service} = req.body
     
     if(password!=confirmPassword) return res.status(404).send({error: "password doesn't match"})
     
     const userDB = await getUser(email)
     
     if ( userDB != null) return res.status(404).send({error:"user already exists"})
+
+   if(!admin)return res.status(404).send({error:"only admin is authorized to create a new user"})
+
     const hash = await hashPassword(password)
-    const user = await saveUser({email: email, password: hash})
+   const user = await saveUser({email: email, password: hash,admin:admin,name:name,lastName:lastName,service:service })
+   //const user = await saveUser({email: email, password: hash,admin:admin})
+    console.log("---- signupUser called -----saveUser done ",user);
     res.send({user})
   }
   catch(error)
@@ -81,6 +226,7 @@ function  saveUser(user) {
   console.log("save user :" ,user)
   //users.push({user}) 
   return prisma.Users.create({data:user})
+  
   //const allUsers = prisma.user.findMany().then(console.log).catch(console.error);
 }
 
@@ -88,4 +234,4 @@ function hashPassword(password) {
   return bcrypt.hash(password,10)
 }
 
-module.exports = { logUser ,signupUser }
+module.exports = { logUser ,signupUser,getUserByEmail,createUser,deleteUser,updateUser}
