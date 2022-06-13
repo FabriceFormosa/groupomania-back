@@ -172,7 +172,7 @@ async function getPosts(req,res)
             return `${protocol}://${host}/${pathToImage}`
         }
         
-        
+    /********************************************************************************************************** */    
         async function createComment(req,res){
             
             try{
@@ -232,7 +232,47 @@ async function getPosts(req,res)
             
         }
         
+        async function updatePost(req,res)
+        {
+            console.log(" updatePost " )
+            try{
+                const postId=Number(req.params.id)
+
+                console.log(" updatePost postId",postId )
+
+                const contentUpdated = req.body.contentUpdated
+
+                console.log(" updatePost contentUpdated",contentUpdated )
+
+               
+                const post = await prisma.Posts.findUnique({where: {id: postId}})
+            
+                if (post == null)
+                {
+                    return res.status(404).send({error:"Post not found"})
+                }
+                    
+                console.log("post found",post)
+                
+                const updatePost = await prisma.Posts.update({
+                    where: {
+                    id: postId,
+                    },
+                    data: {
+                        content:contentUpdated
+                    }
+
+                })
+                res.send({updatePost:updatePost,message:'post updated'}) 
+            }
+            catch(error)
+            {
+                res.status(500).send({error})
+            }
+            
+            
+
+        }
         
         
-        
-        module.exports = { getPosts,createPost,createComment,deletePost}
+        module.exports = { getPosts,createPost,createComment,deletePost,updatePost}
