@@ -59,6 +59,56 @@ async function getPosts(req,res)
             }
             
             );
+
+            allPosts.forEach(post => {
+                var mydate = post.createdAt
+               // test = test.split('T')[1]
+                console.log( "format date ISO :" ,mydate)
+
+                var date = new Date(mydate);
+                var dt = date.getDate();
+                var month = (date.getMonth()+1);
+                var hr = date.getUTCHours();
+                var min = date.getMinutes();
+                if (dt < 10) {
+                    dt = '0' + dt;
+                  }
+                  if (month < 10) {
+                    month = '0' + month;
+                  }
+                mydate = "Posté le: "+dt +'-' + month + '-' +date.getFullYear()+' à '+hr+'h:'+min;
+                console.log( "format date std :" ,mydate)
+                post.createdAt=mydate;
+
+                post.comments.forEach(comment => {
+                    var commentCreateAt = comment.createdAt
+                    // test = test.split('T')[1]
+                     console.log( "comment format date ISO :" ,commentCreateAt)
+     
+                     var date = new Date(commentCreateAt);
+                     var dt = date.getDate();
+                     var month = (date.getMonth()+1);
+                     var hr = date.getUTCHours();
+                     var min = date.getMinutes();
+                     if (dt < 10) {
+                         dt = '0' + dt;
+                       }
+                       if (month < 10) {
+                         month = '0' + month;
+                       }
+                       comment.createdAt = dt +'-' + month + '-' +date.getFullYear()+' à '+hr+'h:'+min;
+                     //  commentCreateAt = dt +'-' + month + '-' +date.getFullYear();
+                     //console.log( "format date std :" ,mydate)
+                    // post.comments.createdAt=commentCreateAt;      
+
+
+                });
+            });
+            // allPosts.forEach(post => {
+            //     console.log( "format date :" ,post.createdAt.split("T")[0])
+            //     //post.createdAt = post.createdAt.split("T")[0];
+            // });
+
             res.send({posts:allPosts,email,user})
         }
         catch(error)

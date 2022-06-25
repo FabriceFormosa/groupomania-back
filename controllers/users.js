@@ -21,17 +21,36 @@ async function updateUser(req,res)
     const hasImage=req.file != null
     const urlAvatar = hasImage ? createImageurl(req):undefined
     
-    const  {id,email,admin,name,lastName,service} = JSON.parse(req.body.user_datas)
+    const  {id,email,password,admin,name,lastName,service} = JSON.parse(req.body.user_datas)
+
+    console.log( "password:",password)
     
     const user = await prisma.Users.findUnique({where: {id: id}})
     console.log("updateUser user: " , user)
     
     if( user == null ) return res.status(404).send({error:"user not found"})
     
-    //console.log("updateUser user:",user)
-    const userId=Number(user.id)
-    console.log("updateUser userId:",userId)
+    var hash = user.password; // hash par defaut 
+
+    console.log(" password :",password)
+
+    if( password != null) // demande changement de mot de passe
+    {  
+        // le mot de passe a changer mise à jour à effectuer
+        console.log("updateUser user password: " , password," :" ,hash)
+        try {
+          hash = await hashPassword(password)
+        } catch (error) {
+          console.log(error)
+        }
+         
+         console.log("updateUser user password: " , password," :" ,hash)
+         
+    }
     
+    const userId=Number(user.id)
+   
+      
     // /// update the user
     const updateUser = await prisma.Users.update({
       where: {
@@ -43,13 +62,14 @@ async function updateUser(req,res)
         lastName: lastName,
         service: service,
         admin:admin,
-        avatar: urlAvatar
+        avatar: urlAvatar,
+        password:hash
         
       }
     })
     
     res.send({updateUser:updateUser}) 
-    
+  
   }
   catch(error)
   {
@@ -161,7 +181,7 @@ async function deleteUser(req,res)
   
   function checkPassword( user,password )
   {
-    //console.log("checkPassword  user.password: ",user.password ," password: ",password)
+    console.log("checkPassword  user.password: ",user.password ," password: ",password)
     return bcrypt.compare(password,user.password)
   }
   
@@ -233,31 +253,44 @@ async function deleteUser(req,res)
     }
   }
   //*************************************************************************** */
-  async function signupUser(req,res)
+  async function signUpUser(req,res)
   {
     console.log("---- signupUser called -----",req.body)
+
     try{
       
-      const  {email,password,confirmPassword,admin,name,lastName,service} = req.body
+      const  {email,password,confirmPassword,admin,name,lastName,service} = JSON.parse(req.body.user_datas)
+
+      if(password!=confirmPassword) return res.status(404).send({error: "Account not created ! passwords don't match",msg:""})
       
-      if(password!=confirmPassword) return res.status(404).send({error: "password doesn't match"})
+      console.log("---- createUser called ----user_datas:-",req.body.user_datas)
+      const hasImage=req.file != null
+      const urlAvatar = hasImage ? createImageurl(req):undefined
+      
+      
+      // if(password!=confirmPassword) return res.status(404).send({error: "password doesn't match"})
       
       const userDB = await getUser(email)
+      console.log("userDB :",userDB)
       
-      if ( userDB != null) return res.status(404).send({error:"user already exists"})
+      if ( userDB != null) return res.status(404).send({error:"user already exists",msg:""})
       
-      if(!admin)return res.status(404).send({error:"only admin is authorized to create a new user"})
       
       const hash = await hashPassword(password)
-      const user = await saveUser({email: email, password: hash,admin:admin,name:name,lastName:lastName,service:service })
+      console.log("hash :",hash)
+      console.log("urlAvatar :",urlAvatar)
+      
+      
+      const user = await saveUser({email: email, password: hash,admin:admin,name:name,lastName:lastName,service:service,avatar:urlAvatar })
       //const user = await saveUser({email: email, password: hash,admin:admin})
       console.log("---- signupUser called -----saveUser done ",user);
-      res.send({user})
+      res.send({user,msg:'user created',err:""})
     }
     catch(error)
     {
       res.status(500).send({error})
     }
+  
   }
   
   function  saveUser(user) {  
@@ -272,4 +305,4 @@ async function deleteUser(req,res)
     return bcrypt.hash(password,10)
   }
   
-  module.exports = { logUser ,signupUser,getUserByEmail,createUser,deleteUser,updateUser}
+  module.exports = { logUser ,signUpUser,getUserByEmail,createUser,deleteUser,updateUser}
