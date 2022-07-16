@@ -33,6 +33,7 @@ async function updateUser(req,res)
     var hash = user.password; // hash par defaut 
 
     console.log(" password :",password)
+    console.log("updateUser urlAvatar :",urlAvatar)
 
     if( password != null) // demande changement de mot de passe
     {  

@@ -63,7 +63,7 @@ async function getPosts(req,res)
             allPosts.forEach(post => {
                 var mydate = post.createdAt
                // test = test.split('T')[1]
-                console.log( "format date ISO :" ,mydate)
+               // console.log( "format date ISO :" ,mydate)
 
                 var date = new Date(mydate);
                 var dt = date.getDate();
@@ -77,13 +77,13 @@ async function getPosts(req,res)
                     month = '0' + month;
                   }
                 mydate = "Posté le: "+dt +'-' + month + '-' +date.getFullYear()+' à '+hr+'h:'+min;
-                console.log( "format date std :" ,mydate)
+                //console.log( "format date std :" ,mydate)
                 post.createdAt=mydate;
 
                 post.comments.forEach(comment => {
                     var commentCreateAt = comment.createdAt
                     // test = test.split('T')[1]
-                     console.log( "comment format date ISO :" ,commentCreateAt)
+                    // console.log( "comment format date ISO :" ,commentCreateAt)
      
                      var date = new Date(commentCreateAt);
                      var dt = date.getDate();

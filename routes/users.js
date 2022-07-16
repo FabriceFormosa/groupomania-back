@@ -11,5 +11,7 @@ usersRouter.post("/create",checkToken,imageAvatar,createUser)// Uniquement pou l
 usersRouter.delete("/:id",checkToken,deleteUser)
 usersRouter.patch("/",checkToken,imageAvatar,updateUser)
 usersRouter.post("/signUp",imageAvatar,signUpUser)
+usersRouter.get("/checkToken",checkToken)
+
 
 module.exports = {usersRouter}
