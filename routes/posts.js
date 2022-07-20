@@ -9,7 +9,8 @@ postRouter.post("/:id",createComment)
 postRouter.get("/",getPosts)
 postRouter.post("/",imageUpload,createPost)
 postRouter.delete("/:id",deletePost)
-postRouter.patch("/:id",updatePost)
+postRouter.patch("/:id",imageUpload,updatePost)
+
 
 
 module.exports = {postRouter}

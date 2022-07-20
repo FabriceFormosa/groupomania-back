@@ -59,12 +59,12 @@ async function getPosts(req,res)
             }
             
             );
-
+            
             allPosts.forEach(post => {
                 var mydate = post.createdAt
-               // test = test.split('T')[1]
-               // console.log( "format date ISO :" ,mydate)
-
+                // test = test.split('T')[1]
+                // console.log( "format date ISO :" ,mydate)
+                
                 var date = new Date(mydate);
                 var dt = date.getDate();
                 var month = (date.getMonth()+1);
@@ -72,43 +72,43 @@ async function getPosts(req,res)
                 var min = date.getMinutes();
                 if (dt < 10) {
                     dt = '0' + dt;
-                  }
-                  if (month < 10) {
+                }
+                if (month < 10) {
                     month = '0' + month;
-                  }
+                }
                 mydate = "Posté le: "+dt +'-' + month + '-' +date.getFullYear()+' à '+hr+'h:'+min;
                 //console.log( "format date std :" ,mydate)
                 post.createdAt=mydate;
-
+                
                 post.comments.forEach(comment => {
                     var commentCreateAt = comment.createdAt
                     // test = test.split('T')[1]
                     // console.log( "comment format date ISO :" ,commentCreateAt)
-     
-                     var date = new Date(commentCreateAt);
-                     var dt = date.getDate();
-                     var month = (date.getMonth()+1);
-                     var hr = date.getUTCHours();
-                     var min = date.getMinutes();
-                     if (dt < 10) {
-                         dt = '0' + dt;
-                       }
-                       if (month < 10) {
-                         month = '0' + month;
-                       }
-                       comment.createdAt = dt +'-' + month + '-' +date.getFullYear()+' à '+hr+'h:'+min;
-                     //  commentCreateAt = dt +'-' + month + '-' +date.getFullYear();
-                     //console.log( "format date std :" ,mydate)
+                    
+                    var date = new Date(commentCreateAt);
+                    var dt = date.getDate();
+                    var month = (date.getMonth()+1);
+                    var hr = date.getUTCHours();
+                    var min = date.getMinutes();
+                    if (dt < 10) {
+                        dt = '0' + dt;
+                    }
+                    if (month < 10) {
+                        month = '0' + month;
+                    }
+                    comment.createdAt = dt +'-' + month + '-' +date.getFullYear()+' à '+hr+'h:'+min;
+                    //  commentCreateAt = dt +'-' + month + '-' +date.getFullYear();
+                    //console.log( "format date std :" ,mydate)
                     // post.comments.createdAt=commentCreateAt;      
-
-
+                    
+                    
                 });
             });
             // allPosts.forEach(post => {
             //     console.log( "format date :" ,post.createdAt.split("T")[0])
             //     //post.createdAt = post.createdAt.split("T")[0];
             // });
-
+            
             res.send({posts:allPosts,email,user})
         }
         catch(error)
@@ -122,7 +122,7 @@ async function getPosts(req,res)
     {
         try
         {
-            console.log("req.file : ",req.file)
+            //console.log("req.file : ",req.file)
             const content = req.body.content;
             const hasImage=req.file != null
             const url = hasImage ? createImageurl(req):undefined
@@ -182,7 +182,7 @@ async function getPosts(req,res)
                 }
             })
             
-            console.log("deletePost post:",post)
+           // console.log("deletePost post:",post)
             
             // test existence du post
             if( post ==null)
@@ -195,7 +195,7 @@ async function getPosts(req,res)
             
             // delete the comments
             const nbCommentDeleted = await prisma.Comments.deleteMany( {where : {postId:post.id}}) //  
-            console.log("deletePost nbCommentDeleted : ",nbCommentDeleted)
+         //   console.log("deletePost nbCommentDeleted : ",nbCommentDeleted)
             
             /// delete the post
             await prisma.Posts.delete( {where : {id:post.id}}) 
@@ -215,25 +215,25 @@ async function getPosts(req,res)
         }
         
         function createImageurl(req){
-            console.log("createImageurl ",req.file.path)
+          //  console.log("createImageurl ",req.file.path)
             let pathToImage=req.file.path.replace("\\","/")
             const protocol = req.protocol
             const host = req.get("host")
             return `${protocol}://${host}/${pathToImage}`
         }
         
-    /********************************************************************************************************** */    
+        /********************************************************************************************************** */    
         async function createComment(req,res){
             
             try{
                 // id du post
-                console.log("createComment postId : ",req.params.id)    
+                //console.log("createComment postId : ",req.params.id)    
                 const postId=Number(req.params.id)
                 
                 // recup du post avec l id 
                 const post = await prisma.Posts.findUnique( {where: {id:postId}})
                 
-                console.log("post :", post  )
+                //console.log("post :", post  )
                 
                 // test existence du post
                 if( post ==null)
@@ -241,7 +241,7 @@ async function getPosts(req,res)
                 
                 //  recupération du userId
                 const email = req.email;
-                console.log("email : ",email)
+                //console.log("email : ",email)
                 const userId = await prisma.Users.findUnique( {where: {email}})
                 
                 //le post existe , ajout du commentaire
@@ -284,45 +284,50 @@ async function getPosts(req,res)
         
         async function updatePost(req,res)
         {
-            console.log(" updatePost " )
+            console.log(" Start updatePost ----------------------------------------------" )
             try{
                 const postId=Number(req.params.id)
-
+                
                 console.log(" updatePost postId",postId )
 
+                const hasImage=req.file != null
+                const url = hasImage ? createImageurl(req):null
+                
                 const contentUpdated = req.body.contentUpdated
-
+               // console.log(" updatePost req",req )
+                console.log(" updatePost req.body",req.body )
                 console.log(" updatePost contentUpdated",contentUpdated )
-
-               
+                
+                
                 const post = await prisma.Posts.findUnique({where: {id: postId}})
-            
+                
                 if (post == null)
                 {
                     return res.status(404).send({error:"Post not found"})
                 }
-                    
-                console.log("post found",post)
                 
-                const updatePost = await prisma.Posts.update({
+                //console.log("post found",post)
+                
+                const update_Post = await prisma.Posts.update({
                     where: {
-                    id: postId,
+                        id: postId,
                     },
                     data: {
-                        content:contentUpdated
+                        content:contentUpdated,
+                        imageUrl:url
                     }
-
+                    
                 })
-                res.send({updatePost:updatePost,message:'post updated'}) 
+                res.send({update_Post:update_Post,message:'post updated'}) 
             }
             catch(error)
             {
                 res.status(500).send({error})
             }
             
+            console.log(" End updatePost --------------------------------------------------- " )
             
-
         }
         
         
-        module.exports = { getPosts,createPost,createComment,deletePost,updatePost}
+        module.exports = { updatePost,getPosts,createPost,createComment,deletePost}

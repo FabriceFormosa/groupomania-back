@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
     
     name = name.split("."+ extension)[0]
     console.log( "***************************************************************************** name",name)
-
+    
     console.log( "file",file)
     
     console.log("extension ",extension)
@@ -40,7 +40,7 @@ const storage_avatar = multer.diskStorage({
     
     name = name.split("."+ extension)[0]
     console.log("++++++++++++++++++++++  name",name)
-
+    
     console.log( "file",file)
     
     console.log("extension ",extension)
