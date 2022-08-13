@@ -13,16 +13,9 @@ const storage = multer.diskStorage({
   filename: (req, file, callback) => {
     const extension = MIME_TYPES[file.mimetype];
     let name = file.originalname.split(" ").join("_");
-
+    
     name = name.split("." + extension)[0];
-    console.log(
-      "***************************************************************************** name",
-      name
-    );
-
-    console.log("file", file);
-
-    console.log("extension ", extension);
+    
     callback(null, name + "_" + Date.now() + "." + extension);
   },
 });
@@ -38,13 +31,7 @@ const storage_avatar = multer.diskStorage({
   filename: (req, file, callback) => {
     const extension = MIME_TYPES[file.mimetype];
     let name = file.originalname.split(" ").join("_");
-
     name = name.split("." + extension)[0];
-    console.log("++++++++++++++++++++++  name", name);
-
-    console.log("file", file);
-
-    console.log("extension ", extension);
     callback(null, name + "_" + Date.now() + "." + extension);
   },
 });
