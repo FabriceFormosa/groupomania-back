@@ -209,21 +209,29 @@ async function updatePost(req, res) {
 
     try {
       const postId = Number(req.params.id);
-      
-     
-      
       const hasImage = req.file != null;
-      const url = hasImage ? createImageurl(req) : null;
+      var url = hasImage ? createImageurl(req) : null;
+
+      console.log(" url :",url)
       
       const contentUpdated = req.body.contentUpdated;
-      
-      
-      
-      
+
+      const deleteImg  = req.body.deleteImg; // 
+            
       const post = await prisma.Posts.findUnique({ where: { id: postId } });
+
       
       if (post == null) {
         return res.status(404).send({ error: "Post not found" });
+      }
+      else
+      {
+      
+        if( url === null ) // pas d'update d'image 
+        {
+          url = deleteImg == "true" ? null : post.imageUrl;
+        }
+     
       }
       
       
