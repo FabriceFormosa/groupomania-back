@@ -56,6 +56,9 @@ async function getPosts(req, res) {
       if (month < 10) {
         month = "0" + month;
       }
+      if (min < 10) {
+        min = "0" + min;
+      }
       mydate =
       "Posté le: " +
       dt +
@@ -83,6 +86,9 @@ async function getPosts(req, res) {
         }
         if (month < 10) {
           month = "0" + month;
+        }
+        if (min < 10) {
+          min = "0" + min;
         }
         comment.createdAt =
         dt + "-" + month + "-" + date.getFullYear() + " à " + hr + "h:" + min;
