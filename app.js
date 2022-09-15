@@ -34,6 +34,11 @@ app.use((req, res, next) => {
     app.use("/upload", express.static("upload"));
     
     app.use("/avatar", express.static("avatar"));
+
+    app.all('/', (req, res) => {
+      console.log("Just got a request!")
+      res.send('Yo!')
+  })
     
     module.exports = app;
     
